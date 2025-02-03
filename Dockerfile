@@ -4,30 +4,31 @@
 # Run image
 # docker run -d -p 3000:3000 flowise
 
-FROM node:18-alpine
+FROM node:20-alpine
 RUN apk add --update libc6-compat python3 make g++
+# needed for pdfjs-dist
+RUN apk add --no-cache build-base cairo-dev pango-dev
 
-WORKDIR /usr/src/packages
+# Install Chromium
+RUN apk add --no-cache chromium
 
-# Copy root package.json and lockfile
-COPY package.json yarn.loc[k] ./
+#install PNPM globaly
+RUN npm install -g pnpm
 
-# Copy components package.json
-COPY packages/components/package.json ./packages/components/package.json
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Copy ui package.json
-COPY packages/ui/package.json ./packages/ui/package.json
+ENV NODE_OPTIONS=--max-old-space-size=8192
 
-# Copy server package.json
-COPY packages/server/package.json ./packages/server/package.json
-
-RUN yarn install
+WORKDIR /usr/src
 
 # Copy app source
 COPY . .
 
-RUN yarn build
+RUN pnpm install
+
+RUN pnpm build
 
 EXPOSE 3000
 
-CMD [ "yarn", "start" ]
+CMD [ "pnpm", "start" ]

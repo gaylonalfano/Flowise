@@ -1,8 +1,10 @@
+import { transformBracesWithColon } from '../../../src'
 import { INode, INodeData, INodeParams, PromptRetriever, PromptRetrieverInput } from '../../../src/Interface'
 
 class PromptRetriever_Retrievers implements INode {
     label: string
     name: string
+    version: number
     description: string
     type: string
     icon: string
@@ -13,6 +15,7 @@ class PromptRetriever_Retrievers implements INode {
     constructor() {
         this.label = 'Prompt Retriever'
         this.name = 'promptRetriever'
+        this.version = 1.0
         this.type = 'PromptRetriever'
         this.icon = 'promptretriever.svg'
         this.category = 'Retrievers'
@@ -46,7 +49,8 @@ class PromptRetriever_Retrievers implements INode {
     async init(nodeData: INodeData): Promise<any> {
         const name = nodeData.inputs?.name as string
         const description = nodeData.inputs?.description as string
-        const systemMessage = nodeData.inputs?.systemMessage as string
+        let systemMessage = nodeData.inputs?.systemMessage as string
+        systemMessage = transformBracesWithColon(systemMessage)
 
         const obj = {
             name,
